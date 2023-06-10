@@ -202,7 +202,7 @@ const EmployeeCard=(props)=> {
                   className="skill-design"
                   style={{
                     color: "#c5c6c7",
-                    border: `1px solid ${this.state.colour[index % 5]}`,
+                    border: `1px solid ${colour[index % 5]}`,
                   }}
                 >
                   <p>{skill.name}</p>

@@ -1,18 +1,17 @@
-import React, { Component } from "react";
+import React, { Component, useEffect ,useState } from "react";
 import { toast } from "react-toastify";
 import EmployeeCard from "../../components/EmployeeCard";
 import "./Admin.css";
 import Admin from "../../abis/Admin.json";
 import LoadComp from "../../components/LoadComp";
 
-export default class AllEmployees extends Component {
-  state = {
-    employees: [],
-    loadcomp: false,
-  };
+const AllEmployees =()=> {
 
-  componentDidMount = async () => {
-    this.setState({ loadcomp: true });
+  const [employees, setEmployees] = useState([]);
+  const [loadcomp, setLoadcomp] = useState(false);
+
+  useEffect(async()=>{
+    setLoadcomp(true);
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -27,25 +26,27 @@ export default class AllEmployees extends Component {
             admin.methods.getEmployeeContractByIndex(index).call()
           )
       );
-      this.setState({ employees });
+      setEmployees(employees);
+      // this.setState({ employees });
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loadcomp: false });
-  };
+    setLoadcomp(false);
+    // this.setState({ loadcomp: false });
+   },[]);
 
-  render() {
-    return this.state.loadcomp ? (
+     return loadcomp ? (
       <LoadComp />
     ) : (
       <div className="admin">
         <h2 className="card-heading">All Registered Employees</h2>
         <br />
-        {this.state.employees?.map((employee, index) => (
+        {employees?.map((employee, index) => (
           <EmployeeCard key={index} employeeContractAddress={employee} />
         ))}
         <br />
       </div>
     );
-  }
-}
+ }
+
+ export default AllEmployees;
