@@ -1,18 +1,16 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Header, Image, Grid } from "semantic-ui-react";
 import ChatBody from "../../components/ChatBody";
 import Nochats from "../../components/NoChats";
 import "./Notifications.css";
 import { db } from "../../firebase/firebase";
 
-export default class Notifications extends Component {
-  colour = ["b6e498", "61dafb", "764abc", "83cd29", "00d1b2"];
-  state = {
-    curr: {},
-    conversations: [],
-  };
+const Notifications=()=> {
+  const colour = ["b6e498", "61dafb", "764abc", "83cd29", "00d1b2"];
+  const [conversations, setConversations] = useState([]);
+  const [current, setCurrent] = useState({});
 
-  componentDidMount = async () => {
+  useEffect(async () => {
     const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
     await db
@@ -20,27 +18,26 @@ export default class Notifications extends Component {
       .doc(accounts[0])
       .collection("activechats")
       .onSnapshot((snapshot) =>
-        this.setState({ conversations: snapshot.docs.map((doc) => doc.data()) })
-      );
-    console.log(this.state.conversations);
-  };
+        setConversations(snapshot.docs.map((doc) => doc.data()))
+       );
+   console.log(conversations);
+  },[]);
 
-  genImg = (name) => {
+  const genImg = (name) => {
     return `https://ui-avatars.com/api/?background=${
       this.colour[Math.floor(Math.random() * 5)]
     }&color=fff&name=${name}`;
   };
 
-  setCurr = (data) => {
+  const setCurr = (data) => {
     const curr = {
       ...data,
       avatar: this.genImg(data.name),
     };
-    this.setState({ curr });
+      setCurrent(curr);
   };
 
-  render() {
-    return (
+     return (
       <div className="notifications">
         <Grid style={{ height: "100%", width: "100%" }}>
           <Grid.Row>
@@ -63,11 +60,11 @@ export default class Notifications extends Component {
                     }}
                   >
                     <Table.Body className="sidechat-body">
-                      {this.state?.conversations?.map((data) => {
+                      {conversations?.map((data) => {
                         return (
                           <Table.Row
                             className="row-cell-container"
-                            onClick={() => this.setCurr(data)}
+                            onClick={() => setCurr(data)}
                             key={data.ethAddress}
                           >
                             <Table.Cell className="header-row-cell">
@@ -77,7 +74,7 @@ export default class Notifications extends Component {
                                 className="notification-sidechat"
                               >
                                 <Image
-                                  src={this.genImg(data.name)}
+                                  src={genImg(data.name)}
                                   rounded
                                   size="mini"
                                 />
@@ -105,12 +102,12 @@ export default class Notifications extends Component {
               </div>
             </Grid.Column>
             <Grid.Column width={10}>
-              {this.state.curr.ethAddress ? (
+              {current.ethAddress ? (
                 <ChatBody
-                  name={this.state.curr.name}
-                  ethAddress={this.state.curr.ethAddress}
-                  avatar={this.state.curr.avatar}
-                  key={this.state.curr.ethAddress}
+                  name={current.name}
+                  ethAddress={current.ethAddress}
+                  avatar={current.avatar}
+                  key={current.ethAddress}
                 />
               ) : (
                 <Nochats />
@@ -121,4 +118,5 @@ export default class Notifications extends Component {
       </div>
     );
   }
-}
+
+  export default Notifications;
