@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import {
   Button,
   Card,
@@ -13,24 +13,29 @@ import Employee from "../../abis/Employee.json";
 import { toast } from "react-toastify";
 import ScanQR from "../../components/ScanQR";
 
-export default class Endorse extends Component {
-  state = {
-    employee_address: "",
-    section: "",
-    skillLoading: false,
-    certification_name: "",
-    scanQR: false,
+const Endorse=()=>{
+    const[employee_address,setEmployeeAddresss]=useState("");
+    const[section,setSections]=useState("");
+    const[skillLoading,setSkillLoadings]=useState(false);
+    const[certification_name,setCertificationNames]=useState("");
+    const[scanQR,setScanQRs]=useState(false)
+    const[skillError,setSkillErrors]=useState("");
+ 
+  const handleEmployeeAddress = (e) => {
+    e.preventDefault();
+    setEmployeeAddresss(e.target.value);
   };
 
-  handleChange = (e) => {
+  const handleCertificationName = (e) => {
     e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
+    setCertificationNames(e.target.value);
   };
-
-  handleSkillEndorse = async (e) => {
+  
+  const handleSkillEndorse = async (e) => {
     e.preventDefault();
-    this.setState({ skillLoading: true, skillError: "" });
-    const { employee_address, section, certification_name } = this.state;
+    setSkillLoadings(true);
+    setSkillErrors("");
+    
     if (!employee_address || !section) {
       toast.error("Please enter all the fields.");
       return;
@@ -71,27 +76,26 @@ export default class Endorse extends Component {
         }
         toast.success("Endorsed successfully!!");
       } catch (err) {
-        this.setState({ skillError: err.message });
+        setSkillErrors(err.message);
+        // this.setState({ skillError: err.message });
       }
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({
-      skillLoading: false,
-      section: "",
-      employee_address: "",
-    });
+    setSkillLoadings(false);
+    setSections("");
+    setEmployeeAddresss("");
   };
 
-  closeScanQRModal = () => {
-    this.setState({ scanQR: false });
+  const closeScanQRModal = () => {
+    setScanQRs(false);
   };
 
-  handleAddAddress = (res) => {
-    this.setState({ employee_address: res });
-  };
+  const handleAddAddress = (res) => {
+    setEmployeeAddresss(res);
+    };
 
-  roleOptions = [
+  const roleOptions = [
     {
       key: "0",
       text: "No-Role-Selected",
@@ -114,15 +118,14 @@ export default class Endorse extends Component {
     },
   ];
 
-  handleDropdownSelect = (e, data) => {
-    this.setState({ section: data.value });
+  const handleDropdownSelect = (e, data) => {
+   setSections(data.value);
   };
 
-  render() {
-    return (
+     return (
       <>
         <ScanQR
-          isOpen={this.state.scanQR}
+          isOpen={ scanQR}
           closeScanQRModal={this.closeScanQRModal}
           handleAddAddress={this.handleAddAddress}
         />
@@ -137,7 +140,7 @@ export default class Endorse extends Component {
                 <Form
                   className="form-inputs"
                   onSubmit={this.handleSkillEndorse}
-                  error={!!this.state.skillError}
+                  error={!! skillError}
                 >
                   <Form.Field className="form-inputs">
                     <Input action>
@@ -146,14 +149,14 @@ export default class Endorse extends Component {
                         placeholder="Employee Address"
                         autoComplete="off"
                         autoCorrect="off"
-                        value={this.state.employee_address}
-                        onChange={this.handleChange}
+                        value={ employee_address}
+                        onChange={ handleEmployeeAddress}
                       />
                       <Button
                         type="button"
                         content="QR"
                         icon="qrcode"
-                        onClick={() => this.setState({ scanQR: true })}
+                        onClick={() => setScanQRs(true)}
                       />
                     </Input>
                   </Form.Field>
@@ -162,19 +165,19 @@ export default class Endorse extends Component {
                       placeholder="Select Role"
                       fluid
                       selection
-                      options={this.roleOptions}
-                      onChange={this.handleDropdownSelect}
+                      options={ roleOptions}
+                      onChange={ handleDropdownSelect}
                     />
                   </Form.Field>
-                  {this.state.section === "3" && (
+                  {section === "3" && (
                     <Form.Field className="form-inputs">
                       <input
                         id="certification_name"
                         placeholder="Certification Name"
                         autoComplete="off"
                         autoCorrect="off"
-                        value={this.state.certification_name}
-                        onChange={this.handleChange}
+                        value={certification_name}
+                        onChange={handleCertificationName}
                       />
                     </Form.Field>
                   )}
@@ -182,7 +185,7 @@ export default class Endorse extends Component {
                   <Message
                     error
                     header="Oops!!"
-                    content={this.state.skillError}
+                    content={skillError}
                   />
                   <br />
                   <Button
@@ -191,7 +194,7 @@ export default class Endorse extends Component {
                     icon="save"
                     content="Endorse"
                     floated="right"
-                    loading={this.state.skillLoading}
+                    loading={skillLoading}
                   />
                 </Form>
               </div>
@@ -200,5 +203,6 @@ export default class Endorse extends Component {
         </div>
       </>
     );
-  }
-}
+ }
+
+ export default Endorse;
