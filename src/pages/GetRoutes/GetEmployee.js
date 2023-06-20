@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component,useState,useEffect } from "react";
 import { Card, Grid } from "semantic-ui-react";
 import Employee from "../../abis/Employee.json";
 import LineChart from "../../components/LineChart";
@@ -7,32 +7,33 @@ import "./Employee.css";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import LoadComp from "../../components/LoadComp";
 import CodeforcesGraph from "../../components/CodeforcesGraph";
+import { set } from "lodash";
 
-export default class GetEmployee extends Component {
-  state = {
-    employeedata: {},
-    overallEndorsement: [],
-    skills: [],
-    certifications: [],
-    workExps: [],
-    educations: [],
-    colour: ["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"],
-    readmore: false,
-    loadcomp: false,
-  };
+const GetEmployee=(props)=>{
+   
+  const [overallEndorsement,setOverallEndorsement]= useState([]);
+  const [employeedata,setEmployeedata] = useState({});
+    const [skills,setSkills]= useState([]);
+    const [certifications,setCertifications]= useState([]);
+    const [workExps,setWorkExps]= useState([]);
+    const [educations,setEducations]= useState([]);
+    const [readmore,setReadmore]= useState(false);
+    const [loadcomp,setLoadcomp]= useState(false);
+    const colour= ["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"];
+  
 
-  componentDidMount = async () => {
-    this.setState({ loadcomp: true });
-    const employee_address = this.props?.match?.params?.employee_address;
+  useEffect(async () => {
+    setLoadcomp(true);
+    const employee_address = props?.match?.params?.employee_address;
     const web3 = window.web3;
     const EmployeeContract = await new web3.eth.Contract(
       Employee.abi,
       employee_address
     );
-    this.getSkills(EmployeeContract);
-    this.getCertifications(EmployeeContract);
-    this.getWorkExp(EmployeeContract);
-    this.getEducation(EmployeeContract);
+    getSkills(EmployeeContract);
+    getCertifications(EmployeeContract);
+    getWorkExp(EmployeeContract);
+    getEducation(EmployeeContract);
     const employeedata = await EmployeeContract.methods
       .getEmployeeInfo()
       .call();
@@ -52,14 +53,12 @@ export default class GetEmployee extends Component {
           EmployeeContract?.methods?.overallEndorsement(index).call()
         )
     );
-    this.setState({
-      employeedata: newEmployedata,
-      overallEndorsement,
-      loadcomp: false,
-    });
-  };
+    setEmployeedata(newEmployedata);
+    setOverallEndorsement(overallEndorsement);
+    setLoadcomp(false);
+  },[]);
 
-  getSkills = async (EmployeeContract) => {
+  const getSkills = async (EmployeeContract) => {
     const skillCount = await EmployeeContract?.methods?.getSkillCount().call();
     const skills = await Promise.all(
       Array(parseInt(skillCount))
@@ -83,10 +82,10 @@ export default class GetEmployee extends Component {
       return;
     });
 
-    this.setState({ skills: newskills });
+    setSkills(newskills);
   };
 
-  getCertifications = async (EmployeeContract) => {
+  const getCertifications = async (EmployeeContract) => {
     const certiCount = await EmployeeContract?.methods
       ?.getCertificationCount()
       .call();
@@ -108,10 +107,10 @@ export default class GetEmployee extends Component {
       });
       return;
     });
-    this.setState({ certifications: newcertifications });
+    setCertifications(newcertifications);
   };
 
-  getWorkExp = async (EmployeeContract) => {
+  const getWorkExp = async (EmployeeContract) => {
     const workExpCount = await EmployeeContract?.methods
       ?.getWorkExpCount()
       .call();
@@ -137,10 +136,10 @@ export default class GetEmployee extends Component {
       return;
     });
 
-    this.setState({ workExps: newworkExps });
+    setWorkExps(newworkExps);
   };
 
-  getEducation = async (EmployeeContract) => {
+  const getEducation = async (EmployeeContract) => {
     const educationCount = await EmployeeContract?.methods
       ?.getEducationCount()
       .call();
@@ -162,11 +161,10 @@ export default class GetEmployee extends Component {
       });
       return;
     });
-    this.setState({ educations: neweducation });
+    setEducations(neweducation);
   };
 
-  render() {
-    return this.state.loadcomp ? (
+     return loadcomp ? (
       <LoadComp />
     ) : (
       <div>
@@ -176,11 +174,11 @@ export default class GetEmployee extends Component {
               <Card className="personal-info">
                 <Card.Content>
                   <Card.Header>
-                    {this.state.employeedata?.name}
+                    {employeedata?.name}
                     <small
                       style={{ wordBreak: "break-word", color: "#4F4557" }}
                     >
-                      {this.state.employeedata?.ethAddress}
+                      {employeedata?.ethAddress}
                     </small>
                   </Card.Header>
                   <br />
@@ -188,7 +186,7 @@ export default class GetEmployee extends Component {
                     <p>
                       <em>Location: </em>
                       <span style={{ color: "#c5c6c7" }}>
-                        {this.state.employeedata?.location}
+                        {employeedata?.location}
                       </span>
                     </p>
                   </div>
@@ -198,7 +196,7 @@ export default class GetEmployee extends Component {
                       <em>Overall Endorsement Rating:</em>
                     </p>
                     <LineChart
-                      overallEndorsement={this.state.overallEndorsement}
+                      overallEndorsement={overallEndorsement}
                     />
                   </div>
                 </Card.Content>
@@ -208,7 +206,7 @@ export default class GetEmployee extends Component {
                   <Card.Header>About:</Card.Header>
                   <div>
                     <p style={{ color: "#c5c6c7" }}>
-                      {this.state.employeedata?.description}
+                      {employeedata?.description}
                     </p>
                   </div>
                   <br />
@@ -220,7 +218,7 @@ export default class GetEmployee extends Component {
                     </Card.Header>
                     <br />
                     <div className="education">
-                      {this.state.educations?.map((education, index) => (
+                      {educations?.map((education, index) => (
                         <div className="education-design" key={index}>
                           <div
                             style={{ paddingRight: "50px", color: "#c5c6c7" }}
@@ -273,7 +271,7 @@ export default class GetEmployee extends Component {
                   <Card.Header>Certifications</Card.Header>
                   <br />
                   <div>
-                    {this.state.certifications?.map(
+                    {certifications?.map(
                       (certi, index) =>
                         certi.visible && (
                           <div key={index} className="certification-container">
@@ -324,7 +322,7 @@ export default class GetEmployee extends Component {
                   <Card.Header>Work Experiences</Card.Header>
                   <br />
                   <div className="education">
-                    {this.state.workExps?.map(
+                    {workExps?.map(
                       (workExp, index) =>
                         workExp.visible && (
                           <div className="education-design" key={index}>
@@ -364,7 +362,7 @@ export default class GetEmployee extends Component {
                   <Card.Header>Skills</Card.Header>
                   <br />
                   <div className="skill-height-container">
-                    {this.state.skills?.map((skill, index) =>
+                    {skills?.map((skill, index) =>
                       skill.visible ? (
                         <div>
                           <SkillCard skill={skill} key={index} />
@@ -381,5 +379,6 @@ export default class GetEmployee extends Component {
         </Grid>
       </div>
     );
-  }
-}
+ }
+
+ export default GetEmployee;

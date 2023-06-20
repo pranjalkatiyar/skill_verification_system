@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import Organization from "../../abis/OrganizationEndorser.json";
 import Admin from "../../abis/Admin.json";
 import { toast } from "react-toastify";
@@ -7,28 +7,27 @@ import EmployeeCard from "../../components/EmployeeCard";
 import "./GetOrg.css";
 import LoadComp from "../../components/LoadComp";
 import { withRouter } from "react-router-dom";
+import { set } from "lodash";
 
-class GetOrg extends Component {
-  state = {
-    orgcontractAddress: "",
-    employees: [],
-    employeemodal: false,
-    loadcomp: false,
-  };
+const GetOrg = (props) => {
+  const [orgContractAddress, setorgcontractAddress] = useState("");
+  const [employees, setemployees] = useState([]);
+  const [employeeModal, setEmployeeModal] = useState(false);
+  const [loadcomp, setloadcomp] = useState(false);
 
-  componentDidMount = async () => {
-    this.setState({ loadcomp: true });
-    await this.getEmployees();
-    this.setState({ loadcomp: false });
-  };
+  useEffect(async () => {
+    setloadcomp(true);
+    await getEmployees();
+    setloadcomp(false);
+  }, []);
 
-  getEmployees = async () => {
+  const getEmployees = async () => {
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
-    const orgAddress = this.props.match.params.orgAddress;
+    const orgAddress = props.match.params.orgAddress;
     if (!orgAddress) {
-      this.props.history.push("/");
+      props.history.push("/");
       return;
     }
     if (AdminData) {
@@ -54,36 +53,32 @@ class GetOrg extends Component {
           })
       );
 
-      this.setState({ orgContractAddress, employees });
+      setorgcontractAddress(orgContractAddress);
+      setemployees(employees);
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
   };
-
-  render() {
-    return this.state.loadcomp ? (
-      <LoadComp />
-    ) : (
+  return loadcomp ? (
+    <LoadComp />
+  ) : (
+    <div>
+      {orgContractAddress && (
+        <OrgEndCard OrgEndContractAddress={orgContractAddress} />
+      )}
+      <br />
       <div>
-        {this.state.orgContractAddress && (
-          <OrgEndCard OrgEndContractAddress={this.state.orgContractAddress} />
-        )}
-        <br />
-        <div>
-          <div
-            style={{ width: "68%", marginLeft: "auto", marginRight: "auto" }}
-          >
-            <h2 className="org-card-heading">Employees in the organization</h2>
-          </div>
-          <br />
-          {this.state.employees?.map((employee, index) => (
-            <EmployeeCard key={index} employeeContractAddress={employee} />
-          ))}
+        <div style={{ width: "68%", marginLeft: "auto", marginRight: "auto" }}>
+          <h2 className="org-card-heading">Employees in the organization</h2>
         </div>
         <br />
+        {employees?.map((employee, index) => (
+          <EmployeeCard key={index} employeeContractAddress={employee} />
+        ))}
       </div>
-    );
-  }
-}
+      <br />
+    </div>
+  );
+};
 
 export default withRouter(GetOrg);

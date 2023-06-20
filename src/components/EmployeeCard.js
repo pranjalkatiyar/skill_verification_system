@@ -1,23 +1,13 @@
 import React, { Component,useEffect,useState } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter ,useHistory} from "react-router-dom";
 import { Card } from "semantic-ui-react";
 import Employee from "../abis/Employee.json";
 import "./EmployeeCard.css";
 import LoadComp from "./LoadComp";
 
 const EmployeeCard=(props)=> {
-  // state = {
-  //   employeedata: {},
-  //   skills: [],
-  //   certifications: [],
-  //   workExps: [],
-  //   educations: [],
-  //   colour: ["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"],
-  //   readmore: false,
-  //   loadcomp: false,
-  // };
-
-  const [employeeData,setEmployeeData] = useState({});
+  const history=useHistory();
+   const [employeeData,setEmployeeData] = useState({});
   const [skills,setSkills] = useState([]);
   const [certifications,setCertifications] = useState([]);
   const [workExps,setWorkExps] = useState([]);
@@ -49,13 +39,7 @@ const EmployeeCard=(props)=> {
     };
     setEmployeeData(newEmployedata);
   },[]);
-
-
-  // componentDidMount = async () => {
-   
-    // this.setState({ employeedata: newEmployedata });
-  // };
-
+ 
   const getSkills = async (EmployeeContract) => {
     const skillCount = await EmployeeContract?.methods?.getSkillCount().call();
     const skills = await Promise.all(
@@ -334,5 +318,4 @@ const EmployeeCard=(props)=> {
    
 }
 
-// export default withRouter(EmployeeCard);
-export default EmployeeCard;
+export default withRouter(EmployeeCard);

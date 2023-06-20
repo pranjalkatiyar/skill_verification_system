@@ -1,18 +1,20 @@
-import React, { Component } from "react";
+import React, { Component,useEffect,useState } from "react";
 import { Table, Header, Image, Grid } from "semantic-ui-react";
 import ChatBody from "../../components/ChatBody";
 import Nochats from "../../components/NoChats";
 import "./Admin.css";
 import { db } from "../../firebase/firebase";
 
-export default class NotificationsAdmin extends Component {
-  colour = ["b6e498", "61dafb", "764abc", "83cd29", "00d1b2"];
-  state = {
-    curr: {},
-    conversations: [],
-  };
+const NotificationsAdmin =()=> {
+  const colour = ["b6e498", "61dafb", "764abc", "83cd29", "00d1b2"];
+  // state = {
+  //   curr: {},
+  //   conversations: [],
+  // };
+  const [curr, setCurr] = useState({});
+  const [conversations, setConversations] = useState([]);
 
-  componentDidMount = async () => {
+  useEffect(async()=>{
     const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
     await db
@@ -20,27 +22,41 @@ export default class NotificationsAdmin extends Component {
       .doc(accounts[0])
       .collection("activechats")
       .onSnapshot((snapshot) =>
-        this.setState({ conversations: snapshot.docs.map((doc) => doc.data()) })
+        setConversations(snapshot.docs.map((doc) => doc.data()))
       );
-    console.log(this.state.conversations);
-  };
+    console.log(conversations);
+  },[]);
 
-  genImg = (name) => {
+
+  // componentDidMount = async () => {
+  //   const web3 = window.web3;
+  //   const accounts = await web3.eth.getAccounts();
+  //   await db
+  //     .collection("users")
+  //     .doc(accounts[0])
+  //     .collection("activechats")
+  //     .onSnapshot((snapshot) =>
+  //       this.setState({ conversations: snapshot.docs.map((doc) => doc.data()) })
+  //     );
+  //   console.log(this.state.conversations);
+  // };
+
+  const genImg = (name) => {
     return `https://ui-avatars.com/api/?background=${
-      this.colour[Math.floor(Math.random() * 5)]
+      colour[Math.floor(Math.random() * 5)]
     }&color=fff&name=${name}`;
   };
 
-  setCurr = (data) => {
+  const setCurrent = (data) => {
     const curr = {
       ...data,
-      avatar: this.genImg(data.name),
+      avatar: genImg(data.name),
     };
-    this.setState({ curr });
+    setCurr(curr);
+    // this.setState({ curr });
   };
 
-  render() {
-    return (
+     return (
       <div className="notifications">
         <Grid style={{ height: "100%", width: "100%" }}>
           <Grid.Row>
@@ -63,11 +79,11 @@ export default class NotificationsAdmin extends Component {
                     }}
                   >
                     <Table.Body className="sidechat-body">
-                      {this.state?.conversations?.map((data) => {
+                      {conversations?.map((data) => {
                         return (
                           <Table.Row
                             className="row-cell-container"
-                            onClick={() => this.setCurr(data)}
+                            onClick={() => setCurrent(data)}
                             key={data.ethAddress}
                           >
                             <Table.Cell className="header-row-cell">
@@ -77,7 +93,7 @@ export default class NotificationsAdmin extends Component {
                                 className="notification-sidechat"
                               >
                                 <Image
-                                  src={this.genImg(data.name)}
+                                  src={genImg(data.name)}
                                   rounded
                                   size="mini"
                                 />
@@ -105,12 +121,12 @@ export default class NotificationsAdmin extends Component {
               </div>
             </Grid.Column>
             <Grid.Column width={10}>
-              {this.state.curr.ethAddress ? (
+              {curr.ethAddress ? (
                 <ChatBody
-                  name={this.state.curr.name}
-                  ethAddress={this.state.curr.ethAddress}
-                  avatar={this.state.curr.avatar}
-                  key={this.state.curr.ethAddress}
+                  name={curr.name}
+                  ethAddress={curr.ethAddress}
+                  avatar={curr.avatar}
+                  key={curr.ethAddress}
                   admin
                 />
               ) : (
@@ -121,5 +137,7 @@ export default class NotificationsAdmin extends Component {
         </Grid>
       </div>
     );
-  }
+  
 }
+
+export default NotificationsAdmin;

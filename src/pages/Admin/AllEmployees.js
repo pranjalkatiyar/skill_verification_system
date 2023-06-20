@@ -27,13 +27,11 @@ const AllEmployees =()=> {
           )
       );
       setEmployees(employees);
-      // this.setState({ employees });
-    } else {
+     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
     setLoadcomp(false);
-    // this.setState({ loadcomp: false });
-   },[]);
+    },[]);
 
      return loadcomp ? (
       <LoadComp />

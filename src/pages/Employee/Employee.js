@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { toast } from "react-toastify";
 import { Card, Grid } from "semantic-ui-react";
 import Admin from "../../abis/Admin.json";
@@ -9,24 +9,37 @@ import "./Employee.css";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import CodeforcesGraph from "../../components/CodeforcesGraph";
 import LoadComp from "../../components/LoadComp";
+import { set } from "lodash";
 
-export default class EmployeePage extends Component {
-  state = {
-    employeedata: {},
-    overallEndorsement: [],
-    skills: [],
-    certifications: [],
-    workExps: [],
-    educations: [],
-    colour: ["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"],
-    readmore: false,
-    codeforces_res: [],
-    loadcomp: false,
-  };
+const EmployeePage=()=> {
+  // state = {
+  //   employeedata: {},
+  //   overallEndorsement: [],
+  //   skills: [],
+  //   certifications: [],
+  //   workExps: [],
+  //   educations: [],
+  //   colour: ["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"],
+  //   readmore: false,
+  //   codeforces_res: [],
+  //   loadcomp: false,
+  // };
 
-  componentDidMount = async () => {
-    this.setState({ loadcomp: true });
-    const web3 = window.web3;
+  const [employeedata,setEmployeedata]=useState({});
+  const [overallEndorsement,setOverallEndorsement]=useState([]);
+  const [skills,setSkills]=useState([]);
+  const [certifications,setCertifications]=useState([]);
+  const [workExps,setWorkExps]=useState([]);
+  const [educations,setEducations]=useState([]);
+  const [colour,setColour]=useState(["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"]);
+  const [readmore,setReadmore]=useState(false);
+  const [codeforces_res,setCodeforces_res]=useState([]);
+  const [loadcomp,setLoadcomp]=useState(false);
+
+
+   useEffect(async() => {
+    setLoadcomp(true);
+     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
     const accounts = await web3.eth.getAccounts();
@@ -39,10 +52,10 @@ export default class EmployeePage extends Component {
         Employee.abi,
         employeeContractAddress
       );
-      this.getSkills(EmployeeContract);
-      this.getCertifications(EmployeeContract);
-      this.getWorkExp(EmployeeContract);
-      this.getEducation(EmployeeContract);
+      getSkills(EmployeeContract);
+      getCertifications(EmployeeContract);
+      getWorkExp(EmployeeContract);
+      getEducation(EmployeeContract);
       const employeedata = await EmployeeContract.methods
         .getEmployeeInfo()
         .call();
@@ -63,14 +76,17 @@ export default class EmployeePage extends Component {
           )
       );
 
-      this.setState({ employeedata: newEmployedata, overallEndorsement });
+      // this.setState({ employeedata: newEmployedata, overallEndorsement });
+      setEmployeedata(newEmployedata);
+      setOverallEndorsement(overallEndorsement);
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loadcomp: false });
-  };
+    setLoadcomp(false);
+    // this.setState({ loadcomp: false });
+   }, []);
 
-  getSkills = async (EmployeeContract) => {
+  const getSkills = async (EmployeeContract) => {
     const skillCount = await EmployeeContract?.methods?.getSkillCount().call();
     const skills = await Promise.all(
       Array(parseInt(skillCount))
@@ -94,10 +110,11 @@ export default class EmployeePage extends Component {
       return;
     });
 
-    this.setState({ skills: newskills });
+    setSkills(newskills);
+    // this.setState({ skills: newskills });
   };
 
-  getCertifications = async (EmployeeContract) => {
+  const getCertifications = async (EmployeeContract) => {
     const certiCount = await EmployeeContract?.methods
       ?.getCertificationCount()
       .call();
@@ -119,10 +136,11 @@ export default class EmployeePage extends Component {
       });
       return;
     });
-    this.setState({ certifications: newcertifications });
+    setCertifications(newcertifications);
+    // this.setState({ certifications: newcertifications });
   };
 
-  getWorkExp = async (EmployeeContract) => {
+  const getWorkExp = async (EmployeeContract) => {
     const workExpCount = await EmployeeContract?.methods
       ?.getWorkExpCount()
       .call();
@@ -148,10 +166,11 @@ export default class EmployeePage extends Component {
       return;
     });
 
-    this.setState({ workExps: newworkExps });
+    setWorkExps(newworkExps);
+    // this.setState({ workExps: newworkExps });
   };
 
-  getEducation = async (EmployeeContract) => {
+  const getEducation = async (EmployeeContract) => {
     const educationCount = await EmployeeContract?.methods
       ?.getEducationCount()
       .call();
@@ -173,11 +192,11 @@ export default class EmployeePage extends Component {
       });
       return;
     });
-    this.setState({ educations: neweducation });
+    setEducations(neweducation);
+    // this.setState({ educations: neweducation });
   };
 
-  render() {
-    return this.state.loadcomp ? (
+     return loadcomp ? (
       <LoadComp />
     ) : (
       <div>
@@ -187,11 +206,11 @@ export default class EmployeePage extends Component {
               <Card className="personal-info">
                 <Card.Content>
                   <Card.Header>
-                    {this.state.employeedata?.name}
+                    {employeedata?.name}
                     <small
                       style={{ wordBreak: "break-word", color: "#c5c6c7" }}
                     >
-                      {this.state.employeedata?.ethAddress}
+                      {employeedata?.ethAddress}
                     </small>
                   </Card.Header>
                   <br />
@@ -199,7 +218,7 @@ export default class EmployeePage extends Component {
                     <p>
                       <em>Location: </em>
                       <span style={{ color: "#c5c6c7" }}>
-                        {this.state.employeedata?.location}
+                        {employeedata?.location}
                       </span>
                     </p>
                   </div>
@@ -209,7 +228,7 @@ export default class EmployeePage extends Component {
                       <em>Overall Endorsement Rating:</em>
                     </p>
                     <LineChart
-                      overallEndorsement={this.state.overallEndorsement}
+                      overallEndorsement={overallEndorsement}
                     />
                   </div>
                 </Card.Content>
@@ -219,7 +238,7 @@ export default class EmployeePage extends Component {
                   <Card.Header>About:</Card.Header>
                   <div>
                     <p style={{ color: "#c5c6c7" }}>
-                      {this.state.employeedata?.description}
+                      {employeedata?.description}
                     </p>
                   </div>
                   <br />
@@ -231,7 +250,7 @@ export default class EmployeePage extends Component {
                     </Card.Header>
                     <br />
                     <div className="education">
-                      {this.state.educations?.map((education, index) => (
+                      {educations?.map((education, index) => (
                         <div className="education-design" key={index}>
                           <div
                             style={{ paddingRight: "50px", color: "#c5c6c7" }}
@@ -284,7 +303,7 @@ export default class EmployeePage extends Component {
                   <Card.Header>Certifications</Card.Header>
                   <br />
                   <div>
-                    {this.state.certifications?.map(
+                    {certifications?.map(
                       (certi, index) =>
                         certi.visible && (
                           <div key={index} className="certification-container">
@@ -335,7 +354,7 @@ export default class EmployeePage extends Component {
                   <Card.Header>Work Experiences</Card.Header>
                   <br />
                   <div className="education">
-                    {this.state.workExps?.map(
+                    {workExps?.map(
                       (workExp, index) =>
                         workExp.visible && (
                           <div className="education-design" key={index}>
@@ -375,7 +394,7 @@ export default class EmployeePage extends Component {
                   <Card.Header>Skills</Card.Header>
                   <br />
                   <div className="skill-height-container">
-                    {this.state.skills?.map((skill, index) =>
+                    {skills?.map((skill, index) =>
                       skill.visible ? (
                         <div>
                           <SkillCard skill={skill} key={index} />
@@ -392,5 +411,7 @@ export default class EmployeePage extends Component {
         </Grid>
       </div>
     );
-  }
-}
+ }
+
+
+export default EmployeePage;

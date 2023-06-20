@@ -1,17 +1,21 @@
-import React, { Component } from "react";
+import React, { Component ,useState,useEffect} from "react";
 import { toast } from "react-toastify";
 import Admin from "../../abis/Admin.json";
 import LoadComp from "../../components/LoadComp";
 import OrgEndCard from "../../components/OrgEndCard";
+import { set } from "lodash";
 
-export default class AllOrganizationEndorser extends Component {
-  state = {
-    orgends: [],
-    loadcomp: false,
-  };
+const  AllOrganizationEndorser =()=> {
+  // state = {
+  //   orgends: [],
+  //   loadcomp: false,
+  // };
+  
+  const [orgends, setOrgends] = useState([]);
+  const [loadcomp, setLoadcomp] = useState(false);
 
-  componentDidMount = async () => {
-    this.setState({ loadcomp: true });
+  useEffect(async()=>{
+    setLoadcomp(true);  
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -27,25 +31,34 @@ export default class AllOrganizationEndorser extends Component {
             admin.methods.getOrganizationContractByIndex(index).call()
           )
       );
-      this.setState({ orgends });
+      // this.setState({ orgends });
+      setOrgends(orgends);
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loadcomp: false });
-  };
+    setLoadcomp(false);
+    // this.setState({ loadcomp: false });
 
-  render() {
-    return this.state.loadcomp ? (
+  },[]);
+
+  // componentDidMount = async () => {
+  //   this.setState({ loadcomp: true });
+    
+  // };
+
+     return loadcomp ? (
       <LoadComp />
     ) : (
       <div className="admin">
         <h2 className="card-heading">All Registered Organization-Endorser</h2>
         <br />
-        {this.state.orgends?.map((orgend, index) => (
+        {orgends?.map((orgend, index) => (
           <OrgEndCard key={index} OrgEndContractAddress={orgend} />
         ))}
         <br />
       </div>
     );
   }
-}
+
+
+export default AllOrganizationEndorser;
