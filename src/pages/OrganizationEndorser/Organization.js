@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import Organization from "../../abis/OrganizationEndorser.json";
 import Admin from "../../abis/Admin.json";
 import { toast } from "react-toastify";
@@ -8,21 +8,20 @@ import "./Organization.css";
 import GetEmployeeModal from "../../components/GetEmployeeModal";
 import LoadComp from "../../components/LoadComp";
 
-export default class OrganizationEndorser extends Component {
-  state = {
-    orgcontractAddress: "",
-    employees: [],
-    employeemodal: false,
-    loadcomp: false,
-  };
+const OrganizationEndorser=()=> {
 
-  componentDidMount = async () => {
-    this.setState({ loadcomp: true });
-    await this.getEmployees();
-    this.setState({ loadcomp: false });
-  };
+  const [orgContractAddress,setOrgcontractAddress]=useState("");
+  const [employees,setEmployees]=useState([]);
+  const [employeemodal,setEmployeemodal]=useState(false);
+  const [loadcomp,setLoadcomp]=useState(false);
 
-  getEmployees = async () => {
+  useEffect(async () => {
+    setLoadcomp(true);
+    await getEmployees();
+    setLoadcomp(false);
+  },[]);
+
+  const getEmployees = async () => {
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -50,29 +49,28 @@ export default class OrganizationEndorser extends Component {
           })
       );
       // console.log("emp", employees);
-
-      this.setState({ orgContractAddress, employees });
-    } else {
+      setOrgcontractAddress(orgContractAddress);
+      setEmployees(employees);
+     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
   };
 
-  closeEmployeeModal = () => {
-    this.setState({ employeemodal: false });
-    this.getEmployees();
-  };
+  const closeEmployeeModal = () => {
+    setEmployeemodal(false);
+    getEmployees();
+   };
 
-  render() {
-    return this.state.loadcomp ? (
+     return loadcomp ? ( 
       <LoadComp />
     ) : (
       <div>
         <GetEmployeeModal
-          isOpen={this.state.employeemodal}
-          closeEmployeeModal={this.closeEmployeeModal}
+          isOpen={ employeemodal}
+          closeEmployeeModal={ closeEmployeeModal}
         />
-        {this.state.orgContractAddress && (
-          <OrgEndCard OrgEndContractAddress={this.state.orgContractAddress} />
+        { orgContractAddress && (
+          <OrgEndCard OrgEndContractAddress={ orgContractAddress} />
         )}
         <br />
         <div>
@@ -81,18 +79,14 @@ export default class OrganizationEndorser extends Component {
           >
             <span
               className="add-employee"
-              onClick={(e) =>
-                this.setState({
-                  employeemodal: !this.state.employeemodal,
-                })
-              }
-            >
+              onClick={(e) =>setEmployeemodal(! employeemodal)}
+             >
               <span class="fas fa-plus">&nbsp;Add Employee</span>
             </span>
             <h2 className="org-card-heading">Employees in the organization</h2>
           </div>
           <br />
-          {this.state.employees?.map((employee, index) => (
+          { employees?.map((employee, index) => (
             <EmployeeCard key={index} employeeContractAddress={employee} />
           ))}
         </div>
@@ -100,4 +94,5 @@ export default class OrganizationEndorser extends Component {
       </div>
     );
   }
-}
+
+export default OrganizationEndorser;

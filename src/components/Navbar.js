@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { withRouter } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Menu, Segment, Image, Label, Icon } from "semantic-ui-react";
@@ -7,16 +7,21 @@ import { Link } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import GenererateQR from "./GenererateQR";
 
-class Navbar extends Component {
-  state = { activeItem: "home", role: -1, account: "", showQr: false };
+const Navbar = ()=> {
+ 
+  const [activeItem, setActiveItem] = useState("home");
+  const [role, setRole] = useState(-1);
+  const [account, setAccount] = useState("");
+  const [showQr, setShowQr] = useState(false);
 
-  componentDidMount = async () => {
+
+  useEffect(async () => {
     const web3 = await window.web3;
     console.log(web3);
     const accounts = await web3.eth.getAccounts();
     if (accounts) {
-      this.setState({ account: accounts[0] });
-    }
+      setAccount(accounts[0]);
+     }
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
     if (AdminData) {
@@ -34,27 +39,25 @@ class Navbar extends Component {
       } else if (isOrganizationEndorser) {
         role = 2;
       }
-      this.setState({ role });
+       setRole(role);
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-  };
+  },[]);
 
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name });
+  const handleItemClick = (e, { name }) => setActiveItem(name);
 
-  closeQRModal = () => {
-    this.setState({ showQr: false });
-  };
+  const closeQRModal = () => {
+    setShowQr(false);
+   };
 
-  render() {
-    const { activeItem } = this.state;
-    const roles = ["Admin", "Employee", "Organization"];
+ const roles = ["Admin", "Employee", "Organization"];
 
     return (
       <>
         <GenererateQR
-          isOpen={this.state.showQr}
-          closeQRModal={this.closeQRModal}
+          isOpen={ showQr}
+          closeQRModal={ closeQRModal}
         />
         <Segment
           inverted
@@ -98,131 +101,131 @@ class Navbar extends Component {
             >
               <SearchBar />
             </Menu.Item>
-            {this.state.role === 0 && (
+            { role === 0 && (
               <>
                 <Menu.Item
                   as={Link}
                   to="/"
                   name="Employees"
                   active={activeItem === "Employees"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/all-organization-endorser"
                   name="Organization Endorsers"
                   active={activeItem === "Organization Endorsers"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/create-user"
                   name="Create User"
                   active={activeItem === "Create User"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/notifications"
                   name="Notifications"
                   active={activeItem === "Notifications"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
               </>
             )}
-            {this.state.role === 1 && (
+            { role === 1 && (
               <>
                 <Menu.Item
                   as={Link}
                   to="/"
                   name="Profile"
                   active={activeItem === "Profile"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/update-profile"
                   name="Update Profile"
                   active={activeItem === "Update Profile"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/notifications"
                   name="Notifications"
                   active={activeItem === "Notifications"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
               </>
             )}
 
-            {this.state.role === 2 && (
+            { role === 2 && (
               <>
                 <Menu.Item
                   as={Link}
                   to="/"
                   name="Info Page"
                   active={activeItem === "Info Page"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/endorse-skill"
                   name="Endorse Skill"
                   active={activeItem === "Endorse Skill"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/endorse-section"
                   name="Endorse Section"
                   active={activeItem === "Endorse Section"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/notifications"
                   name="Notifications"
                   active={activeItem === "Notifications"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
               </>
             )}
 
-            {this.state.role === -1 && (
+            { role === -1 && (
               <>
                 <Menu.Item
                   as={Link}
                   to="/"
                   name="Request Admin For Role"
                   active={activeItem === "Request Admin For Role"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
                 <Menu.Item
                   as={Link}
                   to="/notifications"
                   name="Notifications"
                   active={activeItem === "Notifications"}
-                  onClick={this.handleItemClick}
+                  onClick={ handleItemClick}
                 />
               </>
             )}
 
             <Menu.Item position="right">
               <Label style={{ color: "black", background: "white" }}>
-                {this.state.role === -1 ? "No Role" : roles[this.state.role]}
+                { role === -1 ? "No Role" : roles[ role]}
               </Label>
               &nbsp;&nbsp;&nbsp;
               <div style={{ color: "lightgray" }}>
                 <em>
-                  <small>{this.state.account}</small>
+                  <small>{ account}</small>
                 </em>
                 &nbsp;&nbsp;&nbsp;
                 <Icon
                   name="qrcode"
                   size="large"
                   style={{ color: "white", cursor: "pointer" }}
-                  onClick={() => this.setState({ showQr: true })}
+                  onClick={() =>setShowQr(true)}
                 />
               </div>
             </Menu.Item>
@@ -230,7 +233,6 @@ class Navbar extends Component {
         </Segment>
       </>
     );
-  }
-}
+ }
 
 export default withRouter(Navbar);

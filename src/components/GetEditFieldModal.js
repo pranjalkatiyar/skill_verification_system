@@ -1,31 +1,32 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form, Header, Modal } from "semantic-ui-react";
 import Admin from "../abis/Admin.json";
 import Employee from "../abis/Employee.json";
 import "./Modals.css";
 
-export default class GetEditFieldModal extends Component {
-  state = {
-    name1: "",
-    description1: "",
-    location1: "",
-    loading: false,
-  };
+const GetEditFieldModal = (props)=> {
+ 
 
-  handleSubmit = async (e) => {
-    var name = this.state.name1;
-    var description = this.state.description1;
-    var location = this.state.location1;
-    if (!name) name = this.props.name;
-    if (!location) location = this.props.location;
-    if (!description) description = this.props.description;
+  const [name1, setName1] = useState("");
+  const [description1, setDescription1] = useState("");
+  const [location1, setLocation1] = useState("");
+  const [loading, setLoading] = useState(false);
+
+
+  const handleSubmit = async (e) => {
+    var name =  name1;
+    var description =  description1;
+    var location =  location1;
+    if (!name) name =  props.name;
+    if (!location) location =  props.location;
+    if (!description) description =  props.description;
     if (!name || !description || !location) {
       toast.error("Please enter all the fields.");
       return;
     }
-    this.setState({ loading: true });
-    e.preventDefault();
+    setLoading(true);
+     e.preventDefault();
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -52,21 +53,17 @@ export default class GetEditFieldModal extends Component {
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loading: false });
-    this.props.closeEditFieldModal();
+    setLoading(false);
+      props.closeEditFieldModal();
   };
 
-  handleChange = (e) => {
-    e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
-  };
+ 
 
-  render() {
-    return (
+     return (
       <Modal
         as={Form}
-        onSubmit={(e) => this.handleSubmit(e)}
-        open={this.props.isOpen}
+        onSubmit={(e) =>  handleSubmit(e)}
+        open={ props.isOpen}
         size="tiny"
         className="modal-des"
       >
@@ -78,7 +75,7 @@ export default class GetEditFieldModal extends Component {
         />
         <Modal.Content className="modal-content">
           <Form className="form-inputs">
-            {!this.props.isDescription && (
+            {! props.isDescription && (
               <>
                 {" "}
                 <Form.Field className="form-inputs">
@@ -87,8 +84,8 @@ export default class GetEditFieldModal extends Component {
                     placeholder="Name"
                     autoComplete="off"
                     autoCorrect="off"
-                    value={this.state.name1}
-                    onChange={this.handleChange}
+                    value={ name1}
+                    onChange={ (e)=>setName1(e.target.value)}
                   />
                 </Form.Field>
                 <Form.Field className="form-inputs">
@@ -97,21 +94,21 @@ export default class GetEditFieldModal extends Component {
                     placeholder="Location"
                     autoComplete="off"
                     autoCorrect="off"
-                    value={this.state.location1}
-                    onChange={this.handleChange}
+                    value={ location1}
+                    onChange={ (e)=> setLocation1(e.target.value)}
                   />
                 </Form.Field>{" "}
               </>
             )}
-            {this.props.isDescription && (
+            { props.isDescription && (
               <Form.Field className="form-inputs">
                 <textarea
                   id="description1"
                   placeholder="About"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.description1}
-                  onChange={this.handleChange}
+                  value={ description1}
+                  onChange={ (e)=> setDescription1(e.target.value)}
                 />
               </Form.Field>
             )}
@@ -124,7 +121,7 @@ export default class GetEditFieldModal extends Component {
             color="red"
             icon="times"
             content="Close"
-            onClick={() => this.props.closeEditFieldModal()}
+            onClick={() =>  props.closeEditFieldModal()}
           />
           <Button
             className="button-css"
@@ -132,10 +129,11 @@ export default class GetEditFieldModal extends Component {
             color="green"
             icon="save"
             content="Save"
-            loading={this.state.loading}
+            loading={ loading}
           />
         </Modal.Actions>
       </Modal>
     );
-  }
-}
+ }
+
+export default GetEditFieldModal;

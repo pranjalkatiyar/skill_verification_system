@@ -1,20 +1,19 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import Employee from "../abis/Employee.json";
 import Admin from "../abis/Admin.json";
 import { toast } from "react-toastify";
 import { Dimmer, Loader } from "semantic-ui-react";
 import { withRouter } from "react-router-dom";
 
-class SearchEmp extends Component {
-  state = {
-    employeedata: {},
-    loading: false,
-    employeeContractAddress: "",
-  };
+const SearchEmp = (props)=> {
+ 
+  const [employeedata, setEmployeedata] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [employeeContractAddress, setEmployeeContractAddress] = useState("");
 
-  componentDidMount = async () => {
-    this.setState({ loading: true });
-    const empAddress = this.props.emp;
+  useEffect(async () => {
+    setLoading(true);
+     const empAddress =  props.emp;
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -38,41 +37,40 @@ class SearchEmp extends Component {
         overallEndorsement: employeedata[4],
         endorsecount: employeedata[5],
       };
-      this.setState({ employeedata: newEmployedata, employeeContractAddress });
-    } else {
+      setEmployeedata(newEmployedata);
+      setEmployeeContractAddress(employeeContractAddress);
+     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loading: false });
-  };
+    setLoading(false);
+   },[]);
 
-  toRoute = () => {
-    this.props.history.push(
-      `/getemployee/${this.state.employeeContractAddress}`
+  const toRoute = () => {
+     props.history.push(
+      `/getemployee/${ employeeContractAddress}`
     );
     window.location.reload(false);
   };
 
-  render() {
-    return this.state.loading ? (
-      <Dimmer active={this.state.loading} inverted>
+     return  loading ? (
+      <Dimmer active={ loading} inverted>
         <Loader inverted content="Fetching..." />
       </Dimmer>
     ) : (
       <div
-        key={this.state.employeeContractAddress}
+        key={ employeeContractAddress}
         className="search-ele"
-        onClick={this.toRoute}
+        onClick={ toRoute}
       >
         <div>
-          <span>{this.state?.employeedata?.name}</span>
-          <span>{this.state?.employeedata?.location}</span>
+          <span>{ employeedata?.name}</span>
+          <span>{ employeedata?.location}</span>
         </div>
-        <small>{this.state?.employeedata?.ethAddress}</small>
+        <small>{employeedata?.ethAddress}</small>
         <br />
-        <small>{this.state?.employeedata?.description}</small>
+        <small>{ employeedata?.description}</small>
       </div>
     );
-  }
-}
+ }
 
 export default withRouter(SearchEmp);

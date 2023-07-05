@@ -1,19 +1,18 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import "./OrgEndCard.css";
 import OrgEnd from "../abis/OrganizationEndorser.json";
 import { Card } from "semantic-ui-react";
 
-export default class OrgEndCard extends Component {
-  state = {
-    orgEndInfo: {},
-    allEmployeesInOrg: [],
-  };
+const OrgEndCard = (props)=> {
+ 
+  const [orgEndInfo, setOrgEndInfo] = useState({});
+  const [allEmployeesInOrg, setAllEmployeesInOrg] = useState([]);
 
-  componentDidMount = async () => {
+  useEffect(async () => {
     const web3 = window.web3;
     const OrgEndContract = await new web3.eth.Contract(
       OrgEnd.abi,
-      this.props.OrgEndContractAddress
+      props.OrgEndContractAddress
     );
 
     const orgEndData = await OrgEndContract.methods
@@ -35,23 +34,23 @@ export default class OrgEndCard extends Component {
           OrgEndContract.methods.getEmployeeByIndex(index).call()
         )
     );
-    this.setState({ orgEndInfo, allEmployeesInOrg });
-  };
+    setOrgEndInfo(orgEndInfo);
+    setAllEmployeesInOrg(allEmployeesInOrg);
+   },[]);
 
-  render() {
-    return (
+     return (
       <Card className="organization-card">
         <Card.Content>
           <Card.Header>
-            <span>{this.state.orgEndInfo?.name}</span>
-            <small>{this.state.orgEndInfo?.ethAddress}</small>
+            <span>{ orgEndInfo?.name}</span>
+            <small>{ orgEndInfo?.ethAddress}</small>
           </Card.Header>
           <br></br>
           <div>
             <p>
               <em>Location : </em>
               <span style={{ color: "#c5c6c7" }}>
-                {this.state.orgEndInfo?.location}
+                { orgEndInfo?.location}
               </span>
             </p>
           </div>
@@ -59,7 +58,7 @@ export default class OrgEndCard extends Component {
           <div>
             <em>Description :</em>
             <p style={{ color: "#c5c6c7" }}>
-              {this.state.orgEndInfo?.description}
+              { orgEndInfo?.description}
             </p>
           </div>
           <br />
@@ -67,12 +66,13 @@ export default class OrgEndCard extends Component {
             <p>
               <em>Employee Count: </em>
               <span style={{ color: "#c5c6c7" }}>
-                {this.state.allEmployeesInOrg?.length}
+                { allEmployeesInOrg?.length}
               </span>
             </p>
           </div>
         </Card.Content>
       </Card>
     );
-  }
-}
+ }
+
+ export default OrgEndCard;

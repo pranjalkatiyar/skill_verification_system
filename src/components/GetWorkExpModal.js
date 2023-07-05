@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form, Header, Input, Modal } from "semantic-ui-react";
 import Admin from "../abis/Admin.json";
@@ -6,25 +6,23 @@ import Employee from "../abis/Employee.json";
 import "./Modals.css";
 import ScanQR from "./ScanQR";
 
-export default class GetWorkExpModal extends Component {
-  state = {
-    role: "",
-    organization: "",
-    startdate: "",
-    enddate: "",
-    description: "",
-    loading: false,
-    scanQR: false,
-  };
+const GetWorkExpModal = (props)=> {
+ 
+  const [role, setRole] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [startdate, setStartdate] = useState("");
+  const [enddate, setEnddate] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [scanQR, setScanQR] = useState(false);
 
-  handleSubmit = async (e) => {
-    const { role, organization, startdate, enddate, description } = this.state;
-    if (!role | !organization || !startdate || !enddate || !description) {
+  const handleSubmit = async (e) => {
+     if (!role | !organization || !startdate || !enddate || !description) {
       toast.error("Please enter all the fields.");
       return;
     }
-    this.setState({ loading: true });
-    e.preventDefault();
+    setLoading(true);
+     e.preventDefault();
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -51,35 +49,55 @@ export default class GetWorkExpModal extends Component {
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loading: false });
-    this.props.closeCertificationModal();
+    setLoading(false);
+      props.closeCertificationModal();
   };
 
-  handleChange = (e) => {
+  // role,organization,startdate,enddate,description
+  const handleRole= (e) => {
     e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
+    setRole(e.target.value);
   };
 
-  closeScanQRModal = () => {
-    this.setState({ scanQR: false });
+  const handleOrganization = (e) => {
+    e.preventDefault();
+    setOrganization(e.target.value);
   };
 
-  handleAddAddress = (res) => {
-    this.setState({ organization: res });
+  const handleStartdate = (e) => {
+    e.preventDefault();
+    setStartdate(e.target.value);
   };
 
-  render() {
-    return (
+  const handleEnddate = (e) => {
+    e.preventDefault();
+    setEnddate(e.target.value);
+  };
+
+  const handleDescription = (e) => {
+    e.preventDefault();
+    setDescription(e.target.value);
+  };
+ 
+  const closeScanQRModal = () => {
+    setScanQR(false);
+   };
+
+  const handleAddAddress = (res) => {
+    setOrganization(res);
+   };
+
+     return (
       <>
         <ScanQR
-          isOpen={this.state.scanQR}
-          closeScanQRModal={this.closeScanQRModal}
-          handleAddAddress={this.handleAddAddress}
+          isOpen={  scanQR}
+          closeScanQRModal={ closeScanQRModal}
+          handleAddAddress={ handleAddAddress}
         />
         <Modal
           as={Form}
-          onSubmit={(e) => this.handleSubmit(e)}
-          open={this.props.isOpen}
+          onSubmit={(e) =>  handleSubmit(e)}
+          open={ props.isOpen}
           size="tiny"
           className="modal-des"
         >
@@ -97,8 +115,8 @@ export default class GetWorkExpModal extends Component {
                   placeholder="Job Title"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.role}
-                  onChange={this.handleChange}
+                  value={  role}
+                  onChange={ handleRole}
                 />
               </Form.Field>
               <Form.Field className="form-inputs">
@@ -108,14 +126,14 @@ export default class GetWorkExpModal extends Component {
                     placeholder="Organization"
                     autoComplete="off"
                     autoCorrect="off"
-                    value={this.state.organization}
-                    onChange={this.handleChange}
+                    value={  organization}
+                    onChange={ handleOrganization}
                   />
                   <Button
                     type="button"
                     content="QR"
                     icon="qrcode"
-                    onClick={() => this.setState({ scanQR: true })}
+                    onClick={() =>setScanQR(true)}
                   />
                 </Input>
               </Form.Field>
@@ -125,8 +143,8 @@ export default class GetWorkExpModal extends Component {
                   placeholder="Start Date"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.startdate}
-                  onChange={this.handleChange}
+                  value={  startdate}
+                  onChange={ handleStartdate}
                 />
               </Form.Field>
               <Form.Field className="form-inputs">
@@ -135,8 +153,8 @@ export default class GetWorkExpModal extends Component {
                   placeholder="End Date"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.enddate}
-                  onChange={this.handleChange}
+                  value={  enddate}
+                  onChange={ handleEnddate}
                 />
               </Form.Field>
               <Form.Field className="form-inputs">
@@ -145,8 +163,8 @@ export default class GetWorkExpModal extends Component {
                   placeholder="Description"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.description}
-                  onChange={this.handleChange}
+                  value={  description}
+                  onChange={ handleDescription}
                 />
               </Form.Field>
             </Form>
@@ -158,7 +176,7 @@ export default class GetWorkExpModal extends Component {
               color="red"
               icon="times"
               content="Close"
-              onClick={() => this.props.closeCertificationModal()}
+              onClick={() =>  props.closeCertificationModal()}
             />
             <Button
               className="button-css"
@@ -166,11 +184,12 @@ export default class GetWorkExpModal extends Component {
               color="green"
               icon="save"
               content="Save"
-              loading={this.state.loading}
+              loading={  loading}
             />
           </Modal.Actions>
         </Modal>
       </>
     );
-  }
-}
+ }
+
+ export default GetWorkExpModal;

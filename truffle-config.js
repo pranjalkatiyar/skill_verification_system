@@ -4,10 +4,7 @@ require("babel-polyfill");
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 
 const { SEED_PHRASE, INFURA_KEY } = require("./seed-phrase");
-const infuraKey =
-"wss://goerli.infura.io/ws/v3/494e148542714a319b50a1e6c19771ef";
-const seedPhrase =
-  "lucky fat march discover scout total rocket shine festival return ethics grit";
+require('dotenv').config();
 
 module.exports = {
   networks: {
@@ -17,7 +14,7 @@ module.exports = {
       network_id: "*", // Any network (default: none,
     },
     goerli: {
-      provider: () => new HDWalletProvider(seedPhrase, infuraKey),
+      provider: () => new HDWalletProvider(process.env.REACT_SEED_PHRASE, process.env.REACT_INFURA_KEY),
       network_id: 5,
       gas: 5500000,
       confirmations: 2,

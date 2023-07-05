@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { Image } from "semantic-ui-react";
 
-export default class Nochats extends Component {
-  render() {
-    return (
+const Nochats = ()=> {
+     return (
       <div
         style={{
           display: "grid",
@@ -23,5 +22,7 @@ export default class Nochats extends Component {
         </p>
       </div>
     );
-  }
-}
+ }
+
+ export default Nochats;
+ 

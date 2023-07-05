@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form, Header, Input, Modal } from "semantic-ui-react";
 import Admin from "../abis/Admin.json";
@@ -6,23 +6,22 @@ import Employee from "../abis/Employee.json";
 import "./Modals.css";
 import ScanQR from "./ScanQR";
 
-export default class GetEducationModal extends Component {
-  state = {
-    institute: "",
-    startdate: "",
-    enddate: "",
-    description: "",
-    loading: false,
-    scanQR: false,
-  };
+const GetEducationModal = (props)=> {
+   
 
-  handleSubmit = async (e) => {
-    const { institute, startdate, enddate, description } = this.state;
-    if (!institute || !startdate || !enddate || !description) {
+  const [institute, setInstitute] = useState("");
+  const [startdate, setStartdate] = useState("");
+  const [enddate, setEnddate] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [scanQR, setScanQR] = useState(false);
+
+  const handleSubmit = async (e) => {
+     if (!institute || !startdate || !enddate || !description) {
       toast.error("Please enter all the fields.");
       return;
     }
-    this.setState({ loading: true });
+    setLoading(true);
     e.preventDefault();
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
@@ -50,35 +49,31 @@ export default class GetEducationModal extends Component {
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loading: false });
-    this.props.closeCertificationModal();
+    setLoading(false);
+    props.closeEducationModal();
+   };
+
+ 
+
+  const closeScanQRModal = () => {
+    setScanQR(false);
+   };
+
+  const handleAddAddress = (res) => {
+    setInstitute(res);
   };
 
-  handleChange = (e) => {
-    e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
-  };
-
-  closeScanQRModal = () => {
-    this.setState({ scanQR: false });
-  };
-
-  handleAddAddress = (res) => {
-    this.setState({ institute: res });
-  };
-
-  render() {
-    return (
+     return (
       <>
         <ScanQR
-          isOpen={this.state.scanQR}
-          closeScanQRModal={this.closeScanQRModal}
-          handleAddAddress={this.handleAddAddress}
+          isOpen={ scanQR}
+          closeScanQRModal={ closeScanQRModal}
+          handleAddAddress={ handleAddAddress}
         />
         <Modal
           as={Form}
-          onSubmit={(e) => this.handleSubmit(e)}
-          open={this.props.isOpen}
+          onSubmit={(e) =>  handleSubmit(e)}
+          open={ props.isOpen}
           size="tiny"
           className="modal-des"
         >
@@ -97,14 +92,14 @@ export default class GetEducationModal extends Component {
                     placeholder="Institute Address"
                     autoComplete="off"
                     autoCorrect="off"
-                    value={this.state.institute}
-                    onChange={this.handleChange}
+                    value={ institute}
+                    onChange={ (e)=> setInstitute(e.target.value)}
                   />
                   <Button
                     type="button"
                     content="QR"
                     icon="qrcode"
-                    onClick={() => this.setState({ scanQR: true })}
+                    onClick={() => setScanQR(true)}
                   />
                 </Input>
               </Form.Field>
@@ -114,8 +109,8 @@ export default class GetEducationModal extends Component {
                   placeholder="Start Date"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.startdate}
-                  onChange={this.handleChange}
+                  value={ startdate}
+                  onChange={ (e)=> setStartdate(e.target.value)}
                 />
               </Form.Field>
               <Form.Field className="form-inputs">
@@ -124,8 +119,8 @@ export default class GetEducationModal extends Component {
                   placeholder="End Date"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.enddate}
-                  onChange={this.handleChange}
+                  value={ enddate}
+                  onChange={ (e)=> setEnddate(e.target.value)}
                 />
               </Form.Field>
               <Form.Field className="form-inputs">
@@ -134,8 +129,8 @@ export default class GetEducationModal extends Component {
                   placeholder="Degree & Major"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.description}
-                  onChange={this.handleChange}
+                  value={ description}
+                  onChange={ (e)=> setDescription(e.target.value)}
                 />
               </Form.Field>
             </Form>
@@ -147,7 +142,7 @@ export default class GetEducationModal extends Component {
               color="red"
               icon="times"
               content="Close"
-              onClick={() => this.props.closeCertificationModal()}
+              onClick={() =>  props.closeCertificationModal()}
             />
             <Button
               className="button-css"
@@ -155,11 +150,11 @@ export default class GetEducationModal extends Component {
               color="green"
               icon="save"
               content="Save"
-              loading={this.state.loading}
+              loading={ loading}
             />
           </Modal.Actions>
         </Modal>
       </>
     );
-  }
-}
+ }
+export default GetEducationModal;

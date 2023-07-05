@@ -126,8 +126,8 @@ const Endorse=()=>{
       <>
         <ScanQR
           isOpen={ scanQR}
-          closeScanQRModal={this.closeScanQRModal}
-          handleAddAddress={this.handleAddAddress}
+          closeScanQRModal={ closeScanQRModal}
+          handleAddAddress={ handleAddAddress}
         />
         <div className="endorse-section">
           <Card className="card-style">
@@ -139,7 +139,7 @@ const Endorse=()=>{
               <div>
                 <Form
                   className="form-inputs"
-                  onSubmit={this.handleSkillEndorse}
+                  onSubmit={ handleSkillEndorse}
                   error={!! skillError}
                 >
                   <Form.Field className="form-inputs">

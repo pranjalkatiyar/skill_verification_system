@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { Card, CardContent } from "semantic-ui-react";
 import Employee from "../abis/Employee.json";
 import Admin from "../abis/Admin.json";
@@ -6,12 +6,11 @@ import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import { toast } from "react-toastify";
 import "./SkillCard.css";
 
-export default class SkillCard extends Component {
-  state = {
-    colour: ["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"],
-  };
+const SkillCard = (props)=> {
+ 
+  const colour=["#b6e498", "#61dafb", "#764abc", "#83cd29", "#00d1b2"];
 
-  removeSkill = async (name) => {
+  const removeSkill = async (name) => {
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -35,14 +34,13 @@ export default class SkillCard extends Component {
     }
   };
 
-  render() {
-    const skill = this.props.skill;
+     const skill =  props.skill;
     return (
       <Card className="skill-des">
-        {this.props.update && (
+        { props.update && (
           <span
             className="delete-button-skill"
-            onClick={(e) => this.removeSkill(skill.name)}
+            onClick={(e) =>  removeSkill(skill.name)}
           >
             {!skill.visible ? (
               <i class="fas fa-eye-slash"></i>
@@ -98,7 +96,7 @@ export default class SkillCard extends Component {
                     textSize: "12px",
                     pathTransitionDuration: 1,
                     pathColor: `${
-                      this.state.colour[Math.floor(Math.random() * 5)]
+                       colour[Math.floor(Math.random() * 5)]
                     }`,
                     textColor: "#c5c6c7",
                     trailColor: "#393b3fa6",
@@ -111,5 +109,6 @@ export default class SkillCard extends Component {
         </CardContent>
       </Card>
     );
-  }
-}
+ }
+
+export default SkillCard;

@@ -4,9 +4,7 @@ import "./Modals.css";
 import { Button, Header, Modal } from "semantic-ui-react";
 
 const GenererateQR =(props)=> {
-  // state = {
-  //   qr: "",
-  // };
+  
   const [qr, setQr] = useState("");
 
   useEffect(async()=>{
@@ -14,18 +12,13 @@ const GenererateQR =(props)=> {
     const accounts = await web3.eth.getAccounts();
     try {
       const res = await QRCode.toDataURL(accounts[0]);
-      // this.setState({ qr: res });
-      setQr(res);
+       setQr(res);
     } catch (err) {
       console.log(err);
     }
   },[])
 
-  // componentDidMount = async () => {
-   
-  // };
-
-    return (
+     return (
       <Modal size="tiny" className="modal-des" open={props.isOpen}>
         <Header
           className="modal-heading"

@@ -1,21 +1,19 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { Line } from "react-chartjs-2";
 
-export default class LineChart extends Component {
-  state = {
-    data: {},
-    options: {},
-    newdata: {},
-  };
+const LineChart = (props)=> {
+   const [data, setData] = useState({});
+  const [options, setOptions] = useState({});
+  const [newdata, setNewdata] = useState({});
 
-  componentDidMount = () => {
+ useEffect( () => {
     setTimeout(() => {
       var data = {
-        labels: [...Array(this.props.overallEndorsement?.length).keys()],
+        labels: [...Array(props.overallEndorsement?.length).keys()],
         datasets: [
           {
             label: "Endorse Rating Spread",
-            data: this.props.overallEndorsement,
+            data:  props.overallEndorsement,
             fill: false,
             backgroundColor: "white",
             borderColor: "rgba(255,255,255,0.3)",
@@ -34,13 +32,11 @@ export default class LineChart extends Component {
           ],
         },
       };
-      this.setState({
-        data,
-        options,
-      });
+      setData(data);
+      setOptions(options);
     }, 1000);
-  };
-  render() {
-    return <Line data={this.state.data} options={this.state.options} />;
+  },[]);
+     return <Line data={ data} options={ options} />;
   }
-}
+ 
+export default LineChart;

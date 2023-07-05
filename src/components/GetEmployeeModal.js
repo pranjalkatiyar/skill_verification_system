@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form, Header, Input, Modal } from "semantic-ui-react";
 import Admin from "../abis/Admin.json";
@@ -6,20 +6,21 @@ import OrgEnd from "../abis/OrganizationEndorser.json";
 import "./Modals.css";
 import ScanQR from "./ScanQR";
 
-export default class GetEmployeeModal extends Component {
-  state = {
-    employee_address: "",
-    loading: false,
-    scanQR: false,
-  };
-  handleSubmit = async (e) => {
-    const { employee_address } = this.state;
-    if (!employee_address) {
+const GetEmployeeModal = (props)=> {
+ 
+
+  const [employee_address, setEmployee_address] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [scanQR, setScanQR] = useState(false);
+
+
+  const handleSubmit = async (e) => {
+     if (!employee_address) {
       toast.error("Please enter all the fields.");
       return;
     }
-    this.setState({ loading: true });
-    e.preventDefault();
+    setLoading(true); 
+     e.preventDefault();
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -44,35 +45,31 @@ export default class GetEmployeeModal extends Component {
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loading: false });
-    this.props.closeEmployeeModal();
+    setLoading(false);
+      props.closeEmployeeModal();
   };
 
-  handleChange = (e) => {
-    e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
-  };
+ 
 
-  closeScanQRModal = () => {
-    this.setState({ scanQR: false });
-  };
+  const closeScanQRModal = () => {
+    setScanQR(false);
+   };
 
-  handleAddAddress = (res) => {
-    this.setState({ employee_address: res });
-  };
+  const handleAddAddress = (res) => {
+    setEmployee_address(res);
+    };
 
-  render() {
-    return (
+     return (
       <>
         <ScanQR
-          isOpen={this.state.scanQR}
-          closeScanQRModal={this.closeScanQRModal}
-          handleAddAddress={this.handleAddAddress}
+          isOpen={ scanQR}
+          closeScanQRModal={ closeScanQRModal}
+          handleAddAddress={ handleAddAddress}
         />
         <Modal
           as={Form}
-          onSubmit={(e) => this.handleSubmit(e)}
-          open={this.props.isOpen}
+          onSubmit={(e) =>  handleSubmit(e)}
+          open={ props.isOpen}
           size="tiny"
           className="modal-des"
         >
@@ -91,14 +88,14 @@ export default class GetEmployeeModal extends Component {
                     placeholder="Employee Address"
                     autoComplete="off"
                     autoCorrect="off"
-                    value={this.state.employee_address}
-                    onChange={this.handleChange}
+                    value={ employee_address}
+                    onChange={ (e)=>setEmployee_address(e.target.value)}
                   />
                   <Button
                     type="button"
                     content="QR"
                     icon="qrcode"
-                    onClick={() => this.setState({ scanQR: true })}
+                    onClick={() =>  setScanQR(true)}
                   />
                 </Input>
               </Form.Field>
@@ -111,7 +108,7 @@ export default class GetEmployeeModal extends Component {
               color="red"
               icon="times"
               content="Close"
-              onClick={() => this.props.closeEmployeeModal()}
+              onClick={() =>  props.closeEmployeeModal()}
             />
             <Button
               className="button-css"
@@ -119,11 +116,12 @@ export default class GetEmployeeModal extends Component {
               color="green"
               icon="save"
               content="Save"
-              loading={this.state.loading}
+              loading={ loading}
             />
           </Modal.Actions>
         </Modal>
       </>
     );
-  }
-}
+ }
+
+ export default GetEmployeeModal;

@@ -1,27 +1,27 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form, Header, Input, Modal } from "semantic-ui-react";
 import Admin from "../abis/Admin.json";
 import Employee from "../abis/Employee.json";
 import "./Modals.css";
 import ScanQR from "./ScanQR";
+ 
+const GetCertificationModal = (props)=> {
+ 
 
-export default class GetCertificationModal extends Component {
-  state = {
-    name: "",
-    organization: "",
-    score: "",
-    loading: false,
-    scanQR: false,
-  };
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [score, setScore] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [scanQR, setScanQR] = useState(false);
 
-  handleSubmit = async (e) => {
-    const { name, organization, score } = this.state;
-    if (!name || !organization || !(score >= 1 && score <= 100)) {
+
+  const handleSubmit = async (e) => {
+     if (!name || !organization || !(score >= 1 && score <= 100)) {
       toast.error("Please enter all the fields.");
       return;
     }
-    this.setState({ loading: true });
+   setLoading(true);
     e.preventDefault();
     const web3 = window.web3;
     const networkId = await web3.eth.net.getId();
@@ -49,35 +49,45 @@ export default class GetCertificationModal extends Component {
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loading: false });
-    this.props.closeCertificationModal();
+    setLoading(false);
+      props.closeCertificationModal();
   };
 
-  handleChange = (e) => {
+  const handleName= (e) => {
     e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
+    setName(e.target.value);
   };
 
-  closeScanQRModal = () => {
-    this.setState({ scanQR: false });
+  const handleScore= (e) => {
+    e.preventDefault();
+      setScore(e.target.value);
   };
 
-  handleAddAddress = (res) => {
-    this.setState({ organization: res });
+  const handleOrganization= (e) => {
+    e.preventDefault();
+    setOrganization(e.target.value);
   };
+   
 
-  render() {
-    return (
+ const  closeScanQRModal = () => {
+  setScanQR(false);
+   };
+
+  const handleAddAddress = (res) => {
+    setOrganization(res);
+   };
+
+     return (
       <>
         <ScanQR
-          isOpen={this.state.scanQR}
-          closeScanQRModal={this.closeScanQRModal}
-          handleAddAddress={this.handleAddAddress}
+          isOpen={  scanQR}
+          closeScanQRModal={ closeScanQRModal}
+          handleAddAddress={ handleAddAddress}
         />
         <Modal
           as={Form}
-          onSubmit={(e) => this.handleSubmit(e)}
-          open={this.props.isOpen}
+          onSubmit={(e) =>  handleSubmit(e)}
+          open={ props.isOpen}
           size="tiny"
           className="modal-des"
         >
@@ -95,8 +105,8 @@ export default class GetCertificationModal extends Component {
                   placeholder="Name"
                   autoComplete="off"
                   autoCorrect="off"
-                  value={this.state.name}
-                  onChange={this.handleChange}
+                  value={  name}
+                  onChange={ handleName}
                 />
               </Form.Field>
               <Form.Field className="form-inputs">
@@ -106,14 +116,14 @@ export default class GetCertificationModal extends Component {
                     placeholder="0x0"
                     autoComplete="off"
                     autoCorrect="off"
-                    value={this.state.organization}
-                    onChange={this.handleChange}
+                    value={  organization}
+                    onChange={ handleOrganization}
                   />
                   <Button
                     type="button"
                     content="QR"
                     icon="qrcode"
-                    onClick={() => this.setState({ scanQR: true })}
+                    onClick={() =>setScanQR(true)}
                   />
                 </Input>
               </Form.Field>
@@ -126,8 +136,8 @@ export default class GetCertificationModal extends Component {
                   type="number"
                   min="1"
                   max="100"
-                  value={this.state.score}
-                  onChange={this.handleChange}
+                  value={  score}
+                  onChange={ handleScore}
                 />
               </Form.Field>
             </Form>
@@ -139,7 +149,7 @@ export default class GetCertificationModal extends Component {
               color="red"
               icon="times"
               content="Close"
-              onClick={() => this.props.closeCertificationModal()}
+              onClick={() =>  props.closeCertificationModal()}
             />
             <Button
               className="button-css"
@@ -147,11 +157,12 @@ export default class GetCertificationModal extends Component {
               color="green"
               icon="save"
               content="Save"
-              loading={this.state.loading}
+              loading={  loading}
             />
           </Modal.Actions>
         </Modal>
       </>
     );
   }
-}
+ 
+  export default GetCertificationModal;

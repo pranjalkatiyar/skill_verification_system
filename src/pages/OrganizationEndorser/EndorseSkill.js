@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Card, Form, Input, Message } from "semantic-ui-react";
 import "./EndorsePage.css";
 import Admin from "../../abis/Admin.json";
@@ -7,27 +7,36 @@ import Skills from "../../abis/Skills.json";
 import { toast } from "react-toastify";
 import ScanQR from "../../components/ScanQR";
 
-export default class EndorseSkil extends Component {
-  state = {
-    employee_address_skill: "",
-    skill_name: "",
-    skill_score: "",
-    skill_review: "",
-    skillError: "",
-    skillLoading: false,
-    scanQR: false,
+const EndorseSkill = () => {
+  const [employee_address_skill, setEmployee_address_skill] = useState("");
+  const [skill_name, setSkill_name] = useState("");
+  const [skill_score, setSkill_score] = useState("");
+  const [skill_review, setSkill_review] = useState("");
+  const [skillError, setSkillError] = useState("");
+  const [skillLoading, setSkillLoading] = useState(false);
+  const [scanQR, setScanQR] = useState(false);
+
+  const handleEmployeeAddressSkillChange = (e) => {
+    setEmployee_address_skill(e.target.value);
   };
 
-  handleChange = (e) => {
-    e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
+  const handleSkillNameChange = (e) => {
+    setSkill_name(e.target.value);
   };
 
-  handleSkillEndorse = async (e) => {
+  const handleSkillScoreChange = (e) => {
+    setSkill_score(e.target.value);
+  };
+
+  const handleSkillReviewChange = (e) => {
+    setSkill_review(e.target.value);
+  };
+  
+  const handleSkillEndorse = async (e) => {
     e.preventDefault();
-    this.setState({ skillLoading: true, skillError: "" });
-    const { employee_address_skill, skill_name, skill_score, skill_review } =
-      this.state;
+    setSkillLoading(true);
+    setSkillError("");
+
     if (
       !employee_address_skill ||
       !skill_name ||
@@ -65,121 +74,115 @@ export default class EndorseSkil extends Component {
           .send({ from: accounts[0] });
         toast.success("Skill Endorsed successfully!!");
       } catch (err) {
-        this.setState({ skillError: err.message });
+        skillError(err.message);
       }
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({
-      skillLoading: false,
-      skill_name: "",
-      skill_review: "",
-      skill_score: "",
-      employee_address_skill: "",
-    });
+    setSkillLoading(false);
+    setSkill_name("");
+    setSkill_review("");
+    setSkill_score("");
+    setEmployee_address_skill("");
   };
 
-  closeScanQRModal = () => {
-    this.setState({ scanQR: false });
+  const closeScanQRModal = () => {
+    setScanQR(false);
   };
 
-  handleAddAddress = (res) => {
-    this.setState({ employee_address_skill: res });
+  const handleAddAddress = (res) => {
+    setEmployee_address_skill(res);
   };
 
-  render() {
-    return (
-      <>
-        <ScanQR
-          isOpen={this.state.scanQR}
-          closeScanQRModal={this.closeScanQRModal}
-          handleAddAddress={this.handleAddAddress}
-        />
-        <div className="endorse-section">
-          <Card className="card-style">
-            <Card.Content>
-              <Card.Header>
-                <h2 className="card-heading">Endorse Skill</h2>
-              </Card.Header>
-              <br />
-              <div>
-                <Form
-                  className="form-inputs"
-                  onSubmit={this.handleSkillEndorse}
-                  error={!!this.state.skillError}
-                >
-                  <Form.Field className="form-inputs">
-                    <Input action>
-                      <input
-                        id="employee_address_skill"
-                        placeholder="Employee Address"
-                        autoComplete="off"
-                        autoCorrect="off"
-                        value={this.state.employee_address_skill}
-                        onChange={this.handleChange}
-                      />
-                      <Button
-                        type="button"
-                        content="QR"
-                        icon="qrcode"
-                        onClick={() => this.setState({ scanQR: true })}
-                      />
-                    </Input>
-                  </Form.Field>
-                  <Form.Field className="form-inputs">
+  return (
+    <>
+      <ScanQR
+        isOpen={scanQR}
+        closeScanQRModal={closeScanQRModal}
+        handleAddAddress={handleAddAddress}
+      />
+      <div className="endorse-section">
+        <Card className="card-style">
+          <Card.Content>
+            <Card.Header>
+              <h2 className="card-heading">Endorse Skill</h2>
+            </Card.Header>
+            <br />
+            <div>
+              <Form
+                className="form-inputs"
+                onSubmit={handleSkillEndorse}
+                error={!!skillError}
+              >
+                <Form.Field className="form-inputs">
+                  <Input action>
                     <input
-                      id="skill_name"
-                      placeholder="Skill Name"
+                      id="employee_address_skill"
+                      placeholder="Employee Address"
                       autoComplete="off"
                       autoCorrect="off"
-                      value={this.state.skill_name}
-                      onChange={this.handleChange}
+                      value={employee_address_skill}
+                      onChange={handleEmployeeAddressSkillChange}
                     />
-                  </Form.Field>
-                  <Form.Field className="form-inputs">
-                    <input
-                      id="skill_score"
-                      placeholder="Skill Level (1-100)"
-                      autoComplete="off"
-                      autoCorrect="off"
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={this.state.skill_score}
-                      onChange={this.handleChange}
+                    <Button
+                      type="button"
+                      content="QR"
+                      icon="qrcode"
+                      onClick={() => setScanQR(true)}
                     />
-                  </Form.Field>
-                  <Form.Field className="form-inputs">
-                    <textarea
-                      id="skill_review"
-                      placeholder="Review"
-                      autoComplete="off"
-                      autoCorrect="off"
-                      value={this.state.skill_review}
-                      onChange={this.handleChange}
-                    />
-                  </Form.Field>
-                  <br />
-                  <Message
-                    error
-                    header="Oops!!"
-                    content={this.state.skillError}
+                  </Input>
+                </Form.Field>
+                <Form.Field className="form-inputs">
+                  <input
+                    id="skill_name"
+                    placeholder="Skill Name"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    value={skill_name}
+                    onChange={handleSkillNameChange}
                   />
-                  <br />
-                  <Button
-                    className="button-css"
-                    type="submit"
-                    icon="save"
-                    content="Endorse"
-                    floated="right"
-                    loading={this.state.skillLoading}
+                </Form.Field>
+                <Form.Field className="form-inputs">
+                  <input
+                    id="skill_score"
+                    placeholder="Skill Level (1-100)"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={skill_score}
+                    onChange={handleSkillScoreChange}
                   />
-                </Form>
-              </div>
-            </Card.Content>
-          </Card>
-        </div>
-      </>
-    );
-  }
-}
+                </Form.Field>
+                <Form.Field className="form-inputs">
+                  <textarea
+                    id="skill_review"
+                    placeholder="Review"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    value={skill_review}
+                    onChange={handleSkillReviewChange}
+                  />
+                </Form.Field>
+                <br />
+                <Message error header="Oops!!" content={skillError} />
+                <br />
+                <Button
+                  className="button-css"
+                  type="submit"
+                  icon="save"
+                  content="Endorse"
+                  floated="right"
+                  loading={skillLoading}
+                />
+              </Form>
+            </div>
+          </Card.Content>
+        </Card>
+      </div>
+    </>
+  );
+};
+
+export default EndorseSkill;

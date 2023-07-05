@@ -1,20 +1,19 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button, Form, Header, Modal } from "semantic-ui-react";
 import Admin from "../abis/Admin.json";
 import Employee from "../abis/Employee.json";
 import "./Modals.css";
+import { set } from "lodash";
 
-export default class GetSkillsModal extends Component {
-  state = {
-    name: "",
-    experience: "",
-    loading: false,
-  };
+const GetSkillsModal = (props)=> {
+  const [name, setName] = useState("");
+  const [experience, setExperience] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  handleSubmit = async (e) => {
-    this.setState({ loading: true });
-    const { name, experience } = this.state;
+ const handleSubmit = async (e) => {
+     setLoading(true);
+  
     if (!name || !experience) {
       toast.error("Please enter all the fields.");
       return;
@@ -44,21 +43,16 @@ export default class GetSkillsModal extends Component {
     } else {
       toast.error("The Admin Contract does not exist on this network!");
     }
-    this.setState({ loading: false });
-    this.props.closeCertificationModal();
+    setLoading(false);
+      props.closeCertificationModal();
   };
 
-  handleChange = (e) => {
-    e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
-  };
-
-  render() {
-    return (
+ 
+     return (
       <Modal
         as={Form}
-        onSubmit={(e) => this.handleSubmit(e)}
-        open={this.props.isOpen}
+        onSubmit={(e) =>  handleSubmit(e)}
+        open={ props.isOpen}
         size="tiny"
         className="modal-des"
       >
@@ -76,8 +70,8 @@ export default class GetSkillsModal extends Component {
                 placeholder="Skill Name"
                 autoComplete="off"
                 autoCorrect="off"
-                value={this.state.name}
-                onChange={this.handleChange}
+                value={ name}
+                onChange={ (e)=>setName(e.target.value)}
               />
             </Form.Field>
             <Form.Field className="form-inputs">
@@ -86,8 +80,8 @@ export default class GetSkillsModal extends Component {
                 placeholder="Experience"
                 autoComplete="off"
                 autoCorrect="off"
-                value={this.state.experience}
-                onChange={this.handleChange}
+                value={ experience}
+                onChange={ (e)=>setExperience(e.target.value)}
               />
             </Form.Field>
           </Form>
@@ -99,7 +93,7 @@ export default class GetSkillsModal extends Component {
             color="red"
             icon="times"
             content="Close"
-            onClick={() => this.props.closeCertificationModal()}
+            onClick={() =>  props.closeCertificationModal()}
           />
           <Button
             className="button-css"
@@ -107,10 +101,12 @@ export default class GetSkillsModal extends Component {
             color="green"
             icon="save"
             content="Save"
-            loading={this.state.loading}
+            loading={ loading}
           />
         </Modal.Actions>
       </Modal>
     );
-  }
-}
+ }
+
+
+ export default GetSkillsModal;

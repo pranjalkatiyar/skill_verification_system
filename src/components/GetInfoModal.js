@@ -1,25 +1,27 @@
-import React, { Component } from "react";
+import React, { useState,useEffect } from "react";
 import { Button, Header, Modal, Table } from "semantic-ui-react";
 import "./Modals.css";
 import Admin from "../abis/Admin.json";
 import Employee from "../abis/Employee.json";
 import { toast } from "react-toastify";
 import { withRouter } from "react-router-dom";
+import { set } from "lodash";
 
-class GetInfoModal extends Component {
-  state = {
-    loading: false,
-  };
-
-  createUser = async (e) => {
+const GetInfoModal = (props)=> {
+ 
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const createUser = async (e) => {
     e.preventDefault();
-    const { ethAddress, name, location, role, description } = this.props.info;
+    const { ethAddress, name, location, role, description } =  props.info;
     if (!name || !location || !description || !role || !ethAddress) {
       toast.error("Please fill all the fields!!");
       return;
     }
-    this.setState({ loading: true, errorMessage: "" });
-    const web3 = window.web3;
+    setLoading(true);
+    setErrorMessage("")
+
+     const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -28,10 +30,8 @@ class GetInfoModal extends Component {
 
       const owner = await admin.methods.owner().call();
       if (owner !== accounts[0]) {
-        this.setState({
-          errorMessage: "Sorry! You are not the Admin!!",
-          loading: false,
-        });
+        setErrorMessage("Sorry! You are not the Admin!!");
+        setLoading(false);
         return;
       }
       try {
@@ -39,24 +39,25 @@ class GetInfoModal extends Component {
           .registerUser(ethAddress, name, location, description, role)
           .send({ from: accounts[0] });
         toast.success("New user registered succressfully!!!!");
-        this.props.history.push(
+         props.history.push(
           `${role === "1" ? "/" : "/all-organization-endorser"}`
         );
       } catch (err) {
         console.log(err);
       }
-      this.setState({ loading: false });
-    }
+      setLoading(false);
+     }
   };
 
-  endorseEmployee = async (info) => {
+ const endorseEmployee = async (info) => {
     const { req } = info;
     var section = -1;
     if (req === "Education Endorsement Request") section = 1;
     else if (req === "Certification Endorsement Request") section = 2;
     else if (req === "Work Experience Endorsement Request") section = 3;
-    this.setState({ loading: true, errorMessage: "" });
-    const web3 = window.web3;
+    setLoading(true);
+    setErrorMessage("");
+      const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
     const networkId = await web3.eth.net.getId();
     const AdminData = await Admin.networks[networkId];
@@ -64,7 +65,7 @@ class GetInfoModal extends Component {
       const admin = await new web3.eth.Contract(Admin.abi, AdminData.address);
       try {
         const employeeContractAddress = await admin.methods
-          .getEmployeeContractByAddress(this.props.info?.ethAddress)
+          .getEmployeeContractByAddress( props.info?.ethAddress)
           .call();
         const EmployeeContract = await new web3.eth.Contract(
           Employee.abi,
@@ -87,20 +88,19 @@ class GetInfoModal extends Component {
       } catch (err) {
         console.log(err);
       }
-      this.setState({ loading: false });
-    }
-    this.props.closeInfoModal();
+      setLoading(false);
+     }
+     props.closeInfoModal();
   };
 
-  render() {
-    return (
+     return (
       <>
-        {this.props.isEndorsementReq ? (
-          <Modal open={this.props.isOpen} size="tiny" className="modal-des">
+        { props.isEndorsementReq ? (
+          <Modal open={ props.isOpen} size="tiny" className="modal-des">
             <Header
               className="modal-heading"
               icon="pencil"
-              content={this.props.info?.req}
+              content={ props.info?.req}
               as="h2"
             />
             <Modal.Content className="modal-content">
@@ -110,14 +110,14 @@ class GetInfoModal extends Component {
                   <Table.HeaderCell>Values Provided</Table.HeaderCell>
                 </Table.Row>
                 <hr style={{ border: "none", borderTop: "1px solid white" }} />
-                {this.props.info?.req === "Education Endorsement Request" && (
+                { props.info?.req === "Education Endorsement Request" && (
                   <Table.Body>
                     <Table.Row>
                       <Table.Cell>
                         <p style={{ fontWeight: "700" }}>Institute</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.institute}</p>
+                        <p>{ props.info?.institute}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -125,7 +125,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Description</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.description}</p>
+                        <p>{ props.info?.description}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -133,7 +133,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Start date</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.startdate}</p>
+                        <p>{ props.info?.startdate}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -141,12 +141,12 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>End date</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.enddate}</p>
+                        <p>{ props.info?.enddate}</p>
                       </Table.Cell>
                     </Table.Row>
                   </Table.Body>
                 )}
-                {this.props.info?.req ===
+                { props.info?.req ===
                   "Certification Endorsement Request" && (
                   <Table.Body>
                     <Table.Row>
@@ -154,7 +154,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Name</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.name}</p>
+                        <p>{ props.info?.name}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -162,7 +162,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Organization</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.organization}</p>
+                        <p>{ props.info?.organization}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -170,12 +170,12 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Score</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.score}</p>
+                        <p>{ props.info?.score}</p>
                       </Table.Cell>
                     </Table.Row>
                   </Table.Body>
                 )}
-                {this.props.info?.req ===
+                { props.info?.req ===
                   "Work Experience Endorsement Request" && (
                   <Table.Body>
                     <Table.Row>
@@ -183,7 +183,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Role</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.role}</p>
+                        <p>{ props.info?.role}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -191,7 +191,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Organization</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.organization}</p>
+                        <p>{ props.info?.organization}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -199,7 +199,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Description</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.description}</p>
+                        <p>{ props.info?.description}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -207,7 +207,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Start Date</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.startdate}</p>
+                        <p>{ props.info?.startdate}</p>
                       </Table.Cell>
                     </Table.Row>
                     <Table.Row>
@@ -215,7 +215,7 @@ class GetInfoModal extends Component {
                         <p style={{ fontWeight: "700" }}>Enddate</p>
                       </Table.Cell>
                       <Table.Cell>
-                        <p>{this.props.info?.enddate}</p>
+                        <p>{ props.info?.enddate}</p>
                       </Table.Cell>
                     </Table.Row>
                   </Table.Body>
@@ -229,23 +229,23 @@ class GetInfoModal extends Component {
                 color="red"
                 icon="times"
                 content="Close"
-                onClick={() => this.props.closeInfoModal()}
+                onClick={() =>  props.closeInfoModal()}
               />
-              {this.props.org && (
+              { props.org && (
                 <Button
                   className="button-css"
                   type="submit"
                   color="green"
                   icon="save"
                   content="Endorse"
-                  loading={this.state.loading}
-                  onClick={() => this.endorseEmployee(this.props.info)}
+                  loading={ loading}
+                  onClick={() =>  endorseEmployee( props.info)}
                 />
               )}
             </Modal.Actions>
           </Modal>
         ) : (
-          <Modal open={this.props.isOpen} size="tiny" className="modal-des">
+          <Modal open={ props.isOpen} size="tiny" className="modal-des">
             <Header
               className="modal-heading"
               icon="pencil"
@@ -265,7 +265,7 @@ class GetInfoModal extends Component {
                       <p style={{ fontWeight: "700" }}>Name</p>
                     </Table.Cell>
                     <Table.Cell>
-                      <p>{this.props.info?.name}</p>
+                      <p>{ props.info?.name}</p>
                     </Table.Cell>
                   </Table.Row>
                   <Table.Row>
@@ -273,7 +273,7 @@ class GetInfoModal extends Component {
                       <p style={{ fontWeight: "700" }}>Eth Address</p>
                     </Table.Cell>
                     <Table.Cell>
-                      <p>{this.props.info?.ethAddress}</p>
+                      <p>{ props.info?.ethAddress}</p>
                     </Table.Cell>
                   </Table.Row>
                   <Table.Row>
@@ -281,7 +281,7 @@ class GetInfoModal extends Component {
                       <p style={{ fontWeight: "700" }}>Location</p>
                     </Table.Cell>
                     <Table.Cell>
-                      <p>{this.props.info?.location}</p>
+                      <p>{ props.info?.location}</p>
                     </Table.Cell>
                   </Table.Row>
                   <Table.Row>
@@ -289,7 +289,7 @@ class GetInfoModal extends Component {
                       <p style={{ fontWeight: "700" }}>Description</p>
                     </Table.Cell>
                     <Table.Cell>
-                      <p>{this.props.info?.description}</p>
+                      <p>{ props.info?.description}</p>
                     </Table.Cell>
                   </Table.Row>
                   <Table.Row>
@@ -298,7 +298,7 @@ class GetInfoModal extends Component {
                     </Table.Cell>
                     <Table.Cell>
                       <p>
-                        {this.props.info?.role === "1"
+                        { props.info?.role === "1"
                           ? "Employee"
                           : "Organization Endorser"}
                       </p>
@@ -314,17 +314,17 @@ class GetInfoModal extends Component {
                 color="red"
                 icon="times"
                 content="Close"
-                onClick={() => this.props.closeInfoModal()}
+                onClick={() =>  props.closeInfoModal()}
               />
-              {this.props.admin && (
+              { props.admin && (
                 <Button
                   className="button-css"
                   type="submit"
                   color="green"
                   icon="save"
                   content="Register User"
-                  loading={this.state.loading}
-                  onClick={this.createUser}
+                  loading={ loading}
+                  onClick={ createUser}
                 />
               )}
             </Modal.Actions>
@@ -332,7 +332,6 @@ class GetInfoModal extends Component {
         )}{" "}
       </>
     );
-  }
-}
+ }
 
 export default withRouter(GetInfoModal);
